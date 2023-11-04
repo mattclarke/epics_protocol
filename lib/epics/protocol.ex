@@ -1,4 +1,7 @@
 defmodule Epics.Protocol do
+  @spec create_search_message(non_neg_integer(), String.t()) :: [
+          binary()
+        ]
   def create_search_message(reply_port, pv_name) do
     payload_size = 38 + String.length(pv_name)
 
@@ -58,6 +61,18 @@ defmodule Epics.Protocol do
     ]
   end
 
+  @spec decode_search_response({any(), any(), any()}) ::
+          {:error, String.t()}
+          | {:ok,
+             %{
+               found: byte(),
+               guid: non_neg_integer(),
+               protocol: String.t(),
+               search_instance_ids: [non_neg_integer()],
+               search_seq_id: non_neg_integer(),
+               server_address: non_neg_integer(),
+               server_port: non_neg_integer()
+             }}
   def decode_search_response({_ip, _port, data} = _reply) do
     # TODO: write tests for this whole function
 
@@ -66,7 +81,7 @@ defmodule Epics.Protocol do
         <<(<<guid::96-little>>), <<search_seq_id::32-little>>, <<server_address::128-little>>,
           <<server_port::16-little>>, <<protocol_length::8-little>>, rest::binary>> = payload
 
-        # Flag = 64 => Sent from the server
+        # _flags = 64 => Sent from the server
 
         <<protocol::binary-size(protocol_length), rest::binary>> = rest
 
@@ -76,13 +91,13 @@ defmodule Epics.Protocol do
 
         {:ok,
          %{
+           found: found,
            guid: guid,
-           search_seq_id: search_seq_id,
+           protocol: protocol,
+           search_instance_ids: search_instance_ids,
            server_address: server_address,
            server_port: server_port,
-           protocol: protocol,
-           found: found,
-           search_instance_ids: search_instance_ids
+           search_seq_id: search_seq_id
          }}
 
       _ ->
