@@ -1,5 +1,5 @@
 defmodule EpicsProtocol do
-  def hello do
+  def search_for_pv(name \\ "SIMPLE:VALUE2") do
     options = [
       {:mode, :binary},
       {:active, false},
@@ -10,7 +10,7 @@ defmodule EpicsProtocol do
     {:ok, socket} = :gen_udp.open(0, options)
     {:ok, port} = :inet.port(socket)
 
-    data = Epics.Protocol.create_search_message(port, "SIMPLE:VALUE2")
+    data = Epics.Protocol.create_search_message(port, name)
 
     # Need to auto configure ip address somehow
     :ok = :gen_udp.send(socket, {192, 168, 0, 255}, 5076, data)
