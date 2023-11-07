@@ -17,4 +17,31 @@ defmodule EpicsProtocol do
 
     :gen_udp.recv(socket, 0, _timeout = 5000)
   end
+
+  @spec establish_connection(
+          String.t(),
+          non_neg_integer()
+        ) ::
+          {:ok,
+           %Epics.ConnectionValidation{
+             auth_modes: any(),
+             buffer_size: non_neg_integer(),
+             flags: byte(),
+             introspection_size: char()
+           }}
+  def establish_connection(address, port) do
+    options = [
+      mode: :binary,
+      active: false,
+      reuseaddr: true,
+      exit_on_close: false
+    ]
+
+    {:ok, socket} = :gen_tcp.connect(to_charlist(address), port, options)
+    {:ok, reply} = :gen_tcp.recv(socket, 0, 5000)
+
+    # Validation message is in fact two messages in one, an Echo wrapping a validation
+    {:ok, %Epics.Echo{payload: validation}} = Epics.Echo.decode(reply)
+    Epics.ConnectionValidation.decode(validation)
+  end
 end
