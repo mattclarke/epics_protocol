@@ -4,7 +4,7 @@ defmodule Epics.ConnectionValidation do
 
   @spec decode_request(binary()) ::
           {:ok,
-           %Epics.ConnectionValidation{
+           %ConnectionValidation{
              auth_modes: list(String.t()),
              buffer_size: non_neg_integer(),
              flags: byte(),

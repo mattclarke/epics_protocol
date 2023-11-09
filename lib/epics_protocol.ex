@@ -18,17 +18,6 @@ defmodule EpicsProtocol do
     :gen_udp.recv(socket, 0, _timeout = 5000)
   end
 
-  @spec establish_connection(
-          String.t(),
-          non_neg_integer()
-        ) ::
-          {:ok,
-           %Epics.ConnectionValidation{
-             auth_modes: any(),
-             buffer_size: non_neg_integer(),
-             flags: byte(),
-             introspection_size: char()
-           }}
   def establish_connection(address, port) do
     options = [
       mode: :binary,
