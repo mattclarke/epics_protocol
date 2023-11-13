@@ -1,6 +1,6 @@
 defmodule Epics.GetCommand do
   alias Epics.GetCommand
-  defstruct [:flags, :request_id, :status, :introspection_id]
+  defstruct [:flags, :request_id, :status, :introspection_id, :type_string]
 
   @init_cmd 0x08
 
@@ -58,14 +58,11 @@ defmodule Epics.GetCommand do
         # TODO: don't decode the rest on error or fatal
 
         # starts with fd then introspection ID (unique short)
-        <<0xFD, introspection_id::16-little, field_description, rest::binary>> = rest
+        <<0xFD, introspection_id::16-little, field_description, _rest::binary>> = rest
 
         case field_description do
           128 ->
-            # Structure: identification string + (field name, FieldDesc)[]
-            << string_length, rest::binary >> = rest
-            <<type_string::binary-size(string_length), rest::binary>> = rest
-            IO.inspect(type_string)
+            decode_structure(rest)
         end
 
 
@@ -73,5 +70,38 @@ defmodule Epics.GetCommand do
       _ -> {:error, "Binary data does not conform to expected channelGetResponseInit format"}
     end
 
+  end
+
+  defp decode_structure(data) do
+    <<0xFD, introspection_id::16-little, 128, rest::binary>> = data
+    # Structure: identification string + (field name, FieldDesc)[]
+    <<string_length, structure_name::binary-size(string_length), rest::binary>> = rest
+    IO.inspect(structure_name)
+    # Next byte defines the number of upper level fields
+    <<num_fields, rest::binary>> = rest
+    {_result, rest} = Enum.reduce(0..(num_fields - 1), {[], rest}, fn i, {acc, payload} ->
+      {acc, decode_name_and_type(payload)}
+    end)
+    rest
+  end
+
+  defp decode_name_and_type(data) do
+    # Name of field then type
+    << string_length, name::binary-size(string_length), rest::binary>> = data
+    <<typecode, rest::binary>> = rest
+    IO.inspect(name)
+    IO.inspect(typecode)
+    {type, rest} =
+    case typecode do
+      0x60 -> {"string", rest}
+      0x22 -> {"int", rest}
+      0x23 -> {"long", rest}
+      0x43 -> {"double", rest}
+      0x68 -> {"string[]", rest}
+      0xFD -> {"structure", decode_structure(<<typecode, rest::binary>>)}
+
+    end
+    IO.inspect(type)
+    rest
   end
 end
