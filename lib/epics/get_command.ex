@@ -3,6 +3,7 @@ defmodule Epics.GetCommand do
   defstruct [:flags, :request_id, :status, :fields]
 
   @init_cmd 0x08
+  @get_cmd 0x00
 
   def create_init_get_command(server_channel_id, request_id) do
     [
@@ -86,13 +87,18 @@ defmodule Epics.GetCommand do
 
     # Next byte defines the number of upper level fields
     <<num_fields, rest::binary>> = rest
-    structure = %{"introspection_id" => introspection_id, "name" => structure_name}
 
-    Enum.reduce(0..(num_fields - 1), {structure, rest}, fn _i, {acc, payload} ->
-      {name, type, rest} = decode_name_and_type(payload)
-      acc = Map.put(acc, name, type)
-      {acc, rest}
-    end)
+    {fields, rest} =
+      Enum.reduce(0..(num_fields - 1), {[], rest}, fn _i, {acc, payload} ->
+        {name, type, rest} = decode_name_and_type(payload)
+        {[{name, type} | acc], rest}
+      end)
+
+    {%{
+       "introspection_id" => introspection_id,
+       "name" => structure_name,
+       "fields" => Enum.reverse(fields)
+     }, rest}
   end
 
   defp decode_name_and_type(data) do
@@ -111,5 +117,65 @@ defmodule Epics.GetCommand do
       end
 
     {name, type, rest}
+  end
+
+  def create_get_command(server_channel_id, request_id) do
+    [
+      # HEADER
+      # Magic byte
+      0xCA,
+      # Version
+      2,
+      # Flags
+      0,
+      # Command
+      0x0A,
+      # Payload size in bytes (non-aligned)
+      <<9::32-little>>,
+      # PAYLOAD
+      # serverChannelID
+      <<server_channel_id::32-little>>,
+      # requestID
+      <<request_id::32-little>>,
+      # subcommand
+      @get_cmd
+    ]
+  end
+
+  def decode_channel_get_response(data) do
+    case data do
+      <<0xCA, _version, flags, 0x0A, <<_payload_size::32-little>>, payload::binary>> ->
+        <<(<<request_id::32-little>>), @get_cmd, status, rest::binary>> = payload
+        # TODO: create status module as this is duplicated code
+        status =
+          case status do
+            # Short-hand for OK and string fields omitted.
+            255 -> :ok
+            0 -> :ok
+            1 -> :warning
+            2 -> :error
+            _ -> :fatal
+          end
+
+        IO.inspect("hello")
+
+        # TODO: handle case when status is not 255 and we need to extract the string
+        # TODO: don't decode the rest on error or fatal
+
+        # Our example starts with 01 01 which is a bitset - this represents [0], that is to say all values
+        # are included in the data (because it is the first get)
+        # bitsets start with the size, then the "bits", e.g. 01 80 => length 1 + 00000001 => [7] as the 7th bit is 1
+        # Another example: 02 17 (23 in dec) 01 => length 2 + 11101000 10000000 (LSB to MSB) => [0, 1, 2, 4, 8]
+        <<bitset_length, bitset::binary-size(bitset_length), rest::binary>> = rest
+        IO.inspect(bitset)
+
+        changes = Epics.Bitset.to_array(bitset)
+        IO.inspect(changes)
+
+        {:ok, %GetCommand{flags: flags, request_id: request_id, status: status}}
+
+      _ ->
+        {:error, "Binary data does not conform to expected channelGetResponseInit format"}
+    end
   end
 end

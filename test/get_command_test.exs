@@ -24,47 +24,62 @@ defmodule GetCommandTest do
 
     assert result.request_id == 12345
     assert result.status == :ok
+    IO.inspect(result.fields)
 
     assert result.fields == %{
-             "alarm" => %{
-               "introspection_id" => 2,
-               "message" => "string",
-               "name" => "alarm_t",
-               "severity" => "int",
-               "status" => "int"
-             },
-             "control" => %{
-               "introspection_id" => 6,
-               "limitHigh" => "double",
-               "limitLow" => "double",
-               "minStep" => "double",
-               "name" => "control_t"
-             },
-             "display" => %{
-               "description" => "string",
-               "form" => %{
-                 "choices" => "string[]",
-                 "index" => "int",
-                 "introspection_id" => 5,
-                 "name" => "enum_t"
-               },
-               "introspection_id" => 4,
-               "limitHigh" => "double",
-               "limitLow" => "double",
-               "name" => "structure",
-               "precision" => "int",
-               "units" => "string"
-             },
+             "fields" => [
+               {"value", "string"},
+               {"alarm",
+                %{
+                  "fields" => [
+                    {"severity", "int"},
+                    {"status", "int"},
+                    {"message", "string"}
+                  ],
+                  "introspection_id" => 2,
+                  "name" => "alarm_t"
+                }},
+               {"timeStamp",
+                %{
+                  "fields" => [
+                    {"secondsPastEpoch", "long"},
+                    {"nanoseconds", "int"},
+                    {"userTag", "int"}
+                  ],
+                  "introspection_id" => 3,
+                  "name" => "structure"
+                }},
+               {"display",
+                %{
+                  "fields" => [
+                    {"limitLow", "double"},
+                    {"limitHigh", "double"},
+                    {"description", "string"},
+                    {"units", "string"},
+                    {"precision", "int"},
+                    {"form",
+                     %{
+                       "fields" => [{"index", "int"}, {"choices", "string[]"}],
+                       "introspection_id" => 5,
+                       "name" => "enum_t"
+                     }}
+                  ],
+                  "introspection_id" => 4,
+                  "name" => "structure"
+                }},
+               {"control",
+                %{
+                  "fields" => [
+                    {"limitLow", "double"},
+                    {"limitHigh", "double"},
+                    {"minStep", "double"}
+                  ],
+                  "introspection_id" => 6,
+                  "name" => "control_t"
+                }}
+             ],
              "introspection_id" => 1,
-             "name" => "epics:nt/NTScalar:1.0",
-             "timeStamp" => %{
-               "introspection_id" => 3,
-               "name" => "structure",
-               "nanoseconds" => "int",
-               "secondsPastEpoch" => "long",
-               "userTag" => "int"
-             },
-             "value" => "string"
+             "name" => "epics:nt/NTScalar:1.0"
            }
   end
 
@@ -102,5 +117,22 @@ defmodule GetCommandTest do
   end
 
   test "if status is not ok or warning" do
+  end
+
+  test "decode channelGetResponse for stringin" do
+    binary_response =
+      <<202, 2, 64, 10, 151, 0, 0, 0, 57, 48, 0, 0, 0, 255, 1, 1, 5, 72, 101, 108, 108, 111, 0, 0,
+        0, 0, 2, 0, 0, 0, 3, 85, 68, 70, 128, 157, 158, 37, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 7, 68, 101,
+        102, 97, 117, 108, 116, 6, 83, 116, 114, 105, 110, 103, 6, 66, 105, 110, 97, 114, 121, 7,
+        68, 101, 99, 105, 109, 97, 108, 3, 72, 101, 120, 11, 69, 120, 112, 111, 110, 101, 110,
+        116, 105, 97, 108, 11, 69, 110, 103, 105, 110, 101, 101, 114, 105, 110, 103, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0>>
+
+    {:ok, result} = Epics.GetCommand.decode_channel_get_response(binary_response)
+    IO.inspect(result)
+
+    assert result.request_id == 12345
+    assert result.status == :ok
   end
 end
