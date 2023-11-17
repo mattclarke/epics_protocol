@@ -1,6 +1,151 @@
 defmodule GetCommandTest do
   use ExUnit.Case
 
+  @expected_string_structure %Epics.PvStructure{
+    name: "epics:nt/NTScalar:1.0",
+    type: "structure",
+    introspection_id: 1,
+    fields: [
+      %Epics.PvStructure{
+        name: "value",
+        type: "string",
+        introspection_id: nil,
+        fields: nil
+      },
+      %Epics.PvStructure{
+        name: "alarm",
+        type: "alarm_t",
+        introspection_id: 2,
+        fields: [
+          %Epics.PvStructure{
+            name: "severity",
+            type: "int",
+            introspection_id: nil,
+            fields: nil
+          },
+          %Epics.PvStructure{
+            name: "status",
+            type: "int",
+            introspection_id: nil,
+            fields: nil
+          },
+          %Epics.PvStructure{
+            name: "message",
+            type: "string",
+            introspection_id: nil,
+            fields: nil
+          }
+        ]
+      },
+      %Epics.PvStructure{
+        name: "timeStamp",
+        type: "structure",
+        introspection_id: 3,
+        fields: [
+          %Epics.PvStructure{
+            name: "secondsPastEpoch",
+            type: "long",
+            introspection_id: nil,
+            fields: nil
+          },
+          %Epics.PvStructure{
+            name: "nanoseconds",
+            type: "int",
+            introspection_id: nil,
+            fields: nil
+          },
+          %Epics.PvStructure{
+            name: "userTag",
+            type: "int",
+            introspection_id: nil,
+            fields: nil
+          }
+        ]
+      },
+      %Epics.PvStructure{
+        name: "display",
+        type: "structure",
+        introspection_id: 4,
+        fields: [
+          %Epics.PvStructure{
+            name: "limitLow",
+            type: "double",
+            introspection_id: nil,
+            fields: nil
+          },
+          %Epics.PvStructure{
+            name: "limitHigh",
+            type: "double",
+            introspection_id: nil,
+            fields: nil
+          },
+          %Epics.PvStructure{
+            name: "description",
+            type: "string",
+            introspection_id: nil,
+            fields: nil
+          },
+          %Epics.PvStructure{
+            name: "units",
+            type: "string",
+            introspection_id: nil,
+            fields: nil
+          },
+          %Epics.PvStructure{
+            name: "precision",
+            type: "int",
+            introspection_id: nil,
+            fields: nil
+          },
+          %Epics.PvStructure{
+            name: "form",
+            type: "enum_t",
+            introspection_id: 5,
+            fields: [
+              %Epics.PvStructure{
+                name: "index",
+                type: "int",
+                introspection_id: nil,
+                fields: nil
+              },
+              %Epics.PvStructure{
+                name: "choices",
+                type: "string[]",
+                introspection_id: nil,
+                fields: nil
+              }
+            ]
+          }
+        ]
+      },
+      %Epics.PvStructure{
+        name: "control",
+        type: "control_t",
+        introspection_id: 6,
+        fields: [
+          %Epics.PvStructure{
+            name: "limitLow",
+            type: "double",
+            introspection_id: nil,
+            fields: nil
+          },
+          %Epics.PvStructure{
+            name: "limitHigh",
+            type: "double",
+            introspection_id: nil,
+            fields: nil
+          },
+          %Epics.PvStructure{
+            name: "minStep",
+            type: "double",
+            introspection_id: nil,
+            fields: nil
+          }
+        ]
+      }
+    ]
+  }
+
   test "decode channelGetResponseInit for stringin" do
     binary_response =
       <<202, 2, 64, 10, 38, 1, 0, 0, 57, 48, 0, 0, 8, 255, 253, 1, 0, 128, 21, 101, 112, 105, 99,
@@ -26,61 +171,7 @@ defmodule GetCommandTest do
     assert result.status == :ok
     IO.inspect(result.fields)
 
-    assert result.fields == %{
-             "fields" => [
-               {"value", "string"},
-               {"alarm",
-                %{
-                  "fields" => [
-                    {"severity", "int"},
-                    {"status", "int"},
-                    {"message", "string"}
-                  ],
-                  "introspection_id" => 2,
-                  "name" => "alarm_t"
-                }},
-               {"timeStamp",
-                %{
-                  "fields" => [
-                    {"secondsPastEpoch", "long"},
-                    {"nanoseconds", "int"},
-                    {"userTag", "int"}
-                  ],
-                  "introspection_id" => 3,
-                  "name" => "structure"
-                }},
-               {"display",
-                %{
-                  "fields" => [
-                    {"limitLow", "double"},
-                    {"limitHigh", "double"},
-                    {"description", "string"},
-                    {"units", "string"},
-                    {"precision", "int"},
-                    {"form",
-                     %{
-                       "fields" => [{"index", "int"}, {"choices", "string[]"}],
-                       "introspection_id" => 5,
-                       "name" => "enum_t"
-                     }}
-                  ],
-                  "introspection_id" => 4,
-                  "name" => "structure"
-                }},
-               {"control",
-                %{
-                  "fields" => [
-                    {"limitLow", "double"},
-                    {"limitHigh", "double"},
-                    {"minStep", "double"}
-                  ],
-                  "introspection_id" => 6,
-                  "name" => "control_t"
-                }}
-             ],
-             "introspection_id" => 1,
-             "name" => "epics:nt/NTScalar:1.0"
-           }
+    assert result.fields == @expected_string_structure
   end
 
   test "returns error if header isn't correct" do

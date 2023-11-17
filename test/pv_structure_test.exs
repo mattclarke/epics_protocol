@@ -1,12 +1,56 @@
 defmodule PvStructureTest do
   use ExUnit.Case
 
-  test "can create PvStructure" do
-    result = Epics.PvStructure.create("alarm", "string", 123)
+  @example_fields [
+    %Epics.PvStructure{
+      name: "value",
+      type: "string",
+      introspection_id: nil,
+      fields: nil
+    },
+    %Epics.PvStructure{
+      name: "display",
+      type: "structure",
+      introspection_id: 4,
+      fields: [
+        %Epics.PvStructure{
+          name: "limitLow",
+          type: "double",
+          introspection_id: nil,
+          fields: nil
+        },
+        %Epics.PvStructure{
+          name: "limitHigh",
+          type: "double",
+          introspection_id: nil,
+          fields: nil
+        },
+        %Epics.PvStructure{
+          name: "form",
+          type: "enum_t",
+          introspection_id: 5,
+          fields: [
+            %Epics.PvStructure{
+              name: "index",
+              type: "int",
+              introspection_id: nil,
+              fields: nil
+            },
+            %Epics.PvStructure{
+              name: "choices",
+              type: "string[]",
+              introspection_id: nil,
+              fields: nil
+            }
+          ]
+        }]}]
 
-    assert result.name == "alarm"
+  test "can create PvStructure" do
+    result = Epics.PvStructure.create("strvalue", "string", 123, @example_fields)
+
+    assert result.name == "strvalue"
     assert result.type == "string"
     assert result.introspection_id == 123
-    assert result.fields == nil
+    assert result.fields == @example_fields
   end
 end

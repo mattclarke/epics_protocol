@@ -1,5 +1,6 @@
 defmodule Epics.GetCommand do
   alias Epics.GetCommand
+  alias Epics.PvStructure
   defstruct [:flags, :request_id, :status, :fields]
 
   @init_cmd 0x08
@@ -90,15 +91,10 @@ defmodule Epics.GetCommand do
 
     {fields, rest} =
       Enum.reduce(0..(num_fields - 1), {[], rest}, fn _i, {acc, payload} ->
-        {name, type, rest} = decode_name_and_type(payload)
-        {[{name, type} | acc], rest}
+        {type, rest} = decode_name_and_type(payload)
+        {[type | acc], rest}
       end)
-
-    {%{
-       "introspection_id" => introspection_id,
-       "name" => structure_name,
-       "fields" => Enum.reverse(fields)
-     }, rest}
+    {PvStructure.create(structure_name, "structure", introspection_id, Enum.reverse(fields)), rest}
   end
 
   defp decode_name_and_type(data) do
@@ -108,15 +104,21 @@ defmodule Epics.GetCommand do
 
     {type, rest} =
       case typecode do
-        0x60 -> {"string", rest}
-        0x22 -> {"int", rest}
-        0x23 -> {"long", rest}
-        0x43 -> {"double", rest}
-        0x68 -> {"string[]", rest}
-        0xFD -> decode_structure(<<typecode, rest::binary>>)
+        0x60 -> {PvStructure.create(name, "string"), rest}
+        0x22 -> {PvStructure.create(name, "int"), rest}
+        0x23 -> {PvStructure.create(name, "long"), rest}
+        0x43 -> {PvStructure.create(name, "double"), rest}
+        0x68 -> {PvStructure.create(name, "string[]"), rest}
+        0xFD ->
+          {structure, rest} = decode_structure(<<typecode, rest::binary>>)
+          # What is defined as the name is actually the type, so move the name to the type
+          # And then insert the name defined above
+          type = structure.name
+          structure = %{structure | :name => name, :type => type}
+          {structure, rest}
       end
 
-    {name, type, rest}
+    {type, rest}
   end
 
   def create_get_command(server_channel_id, request_id) do
