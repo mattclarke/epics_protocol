@@ -8,7 +8,7 @@ defmodule GetCommandTest do
     fields: [
       %Epics.PvStructure{
         name: "value",
-        type: "string",
+        type: :string,
         introspection_id: nil,
         fields: nil
       },
@@ -19,19 +19,19 @@ defmodule GetCommandTest do
         fields: [
           %Epics.PvStructure{
             name: "severity",
-            type: "int",
+            type: :int,
             introspection_id: nil,
             fields: nil
           },
           %Epics.PvStructure{
             name: "status",
-            type: "int",
+            type: :int,
             introspection_id: nil,
             fields: nil
           },
           %Epics.PvStructure{
             name: "message",
-            type: "string",
+            type: :string,
             introspection_id: nil,
             fields: nil
           }
@@ -44,19 +44,19 @@ defmodule GetCommandTest do
         fields: [
           %Epics.PvStructure{
             name: "secondsPastEpoch",
-            type: "long",
+            type: :long,
             introspection_id: nil,
             fields: nil
           },
           %Epics.PvStructure{
             name: "nanoseconds",
-            type: "int",
+            type: :int,
             introspection_id: nil,
             fields: nil
           },
           %Epics.PvStructure{
             name: "userTag",
-            type: "int",
+            type: :int,
             introspection_id: nil,
             fields: nil
           }
@@ -69,31 +69,31 @@ defmodule GetCommandTest do
         fields: [
           %Epics.PvStructure{
             name: "limitLow",
-            type: "double",
+            type: :double,
             introspection_id: nil,
             fields: nil
           },
           %Epics.PvStructure{
             name: "limitHigh",
-            type: "double",
+            type: :double,
             introspection_id: nil,
             fields: nil
           },
           %Epics.PvStructure{
             name: "description",
-            type: "string",
+            type: :string,
             introspection_id: nil,
             fields: nil
           },
           %Epics.PvStructure{
             name: "units",
-            type: "string",
+            type: :string,
             introspection_id: nil,
             fields: nil
           },
           %Epics.PvStructure{
             name: "precision",
-            type: "int",
+            type: :int,
             introspection_id: nil,
             fields: nil
           },
@@ -104,13 +104,13 @@ defmodule GetCommandTest do
             fields: [
               %Epics.PvStructure{
                 name: "index",
-                type: "int",
+                type: :int,
                 introspection_id: nil,
                 fields: nil
               },
               %Epics.PvStructure{
                 name: "choices",
-                type: "string[]",
+                type: :string_array,
                 introspection_id: nil,
                 fields: nil
               }
@@ -125,19 +125,19 @@ defmodule GetCommandTest do
         fields: [
           %Epics.PvStructure{
             name: "limitLow",
-            type: "double",
+            type: :double,
             introspection_id: nil,
             fields: nil
           },
           %Epics.PvStructure{
             name: "limitHigh",
-            type: "double",
+            type: :double,
             introspection_id: nil,
             fields: nil
           },
           %Epics.PvStructure{
             name: "minStep",
-            type: "double",
+            type: :double,
             introspection_id: nil,
             fields: nil
           }

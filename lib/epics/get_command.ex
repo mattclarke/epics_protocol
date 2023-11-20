@@ -3,6 +3,8 @@ defmodule Epics.GetCommand do
   alias Epics.PvStructure
   defstruct [:flags, :request_id, :status, :fields]
 
+  @type epics_type :: :string | :int | :float | :long | :double | :string_array
+
   @init_cmd 0x08
   @get_cmd 0x00
 
@@ -104,11 +106,11 @@ defmodule Epics.GetCommand do
 
     {type, rest} =
       case typecode do
-        0x60 -> {PvStructure.create(name, "string"), rest}
-        0x22 -> {PvStructure.create(name, "int"), rest}
-        0x23 -> {PvStructure.create(name, "long"), rest}
-        0x43 -> {PvStructure.create(name, "double"), rest}
-        0x68 -> {PvStructure.create(name, "string[]"), rest}
+        0x60 -> {PvStructure.create(name, :string), rest}
+        0x22 -> {PvStructure.create(name, :int), rest}
+        0x23 -> {PvStructure.create(name, :long), rest}
+        0x43 -> {PvStructure.create(name, :double), rest}
+        0x68 -> {PvStructure.create(name, :string_array), rest}
         0xFD ->
           {structure, rest} = decode_structure(<<typecode, rest::binary>>)
           # What is defined as the name is actually the type, so move the name to the type
