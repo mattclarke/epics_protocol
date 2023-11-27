@@ -46,11 +46,12 @@ defmodule PvStructureTest do
         }]}]
 
   test "can create PvStructure" do
-    result = Epics.PvStructure.create("strvalue", "string", 123, @example_fields)
+    result = Epics.PvStructure.create("strvalue", "string", 123, @example_fields, 456)
 
     assert result.name == "strvalue"
     assert result.type == "string"
     assert result.introspection_id == 123
     assert result.fields == @example_fields
+    assert result.value == 456
   end
 end
