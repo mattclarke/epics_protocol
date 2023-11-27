@@ -225,5 +225,6 @@ defmodule GetCommandTest do
 
     assert result.request_id == 12345
     assert result.status == :ok
+    # assert Epics.PvStructure.get_field(result.fields, "value").value == "Hello world"
   end
 end
