@@ -43,7 +43,10 @@ defmodule PvStructureTest do
               fields: nil
             }
           ]
-        }]}]
+        }
+      ]
+    }
+  ]
 
   test "can create PvStructure" do
     result = Epics.PvStructure.create("strvalue", "string", 123, @example_fields, "hello")
@@ -64,5 +67,11 @@ defmodule PvStructureTest do
     assert result.type == "structure"
     assert result.introspection_id == 4
     refute result.fields == nil
+  end
+
+  test "if field doesn't exist then returns nil" do
+    structure = Epics.PvStructure.create("strvalue", "string", 123, @example_fields)
+
+    assert Epics.PvStructure.get_field(structure, "does not exist") == nil
   end
 end
