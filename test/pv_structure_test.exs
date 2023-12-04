@@ -49,13 +49,12 @@ defmodule PvStructureTest do
   ]
 
   test "can create PvStructure" do
-    result = Epics.PvStructure.create("strvalue", "structure", 0, @example_fields, "hello")
+    result = Epics.PvStructure.create("strvalue", "structure", 0, @example_fields)
 
     assert result.name == "strvalue"
     assert result.type == "structure"
     assert result.introspection_id == 0
     assert result.fields == @example_fields
-    assert result.value == "hello"
   end
 
   test "can access top-level field by name" do
@@ -97,5 +96,16 @@ defmodule PvStructureTest do
     assert Enum.at(result, 2) == ["display", "limitHigh"]
     assert Enum.at(result, 3) == ["display", "form", "index"]
     assert Enum.at(result, 4) == ["display", "form", "choices"]
+  end
+
+  test "can access non top level field by path" do
+    structure = Epics.PvStructure.create("strvalue", "structure", 0, @example_fields)
+
+    result = Epics.PvStructure.get_field_from_path(structure, ["display", "form", "choices"])
+
+    assert result.name == "choices"
+    assert result.type == "string[]"
+    assert result.introspection_id == nil
+    assert result.fields == nil
   end
 end

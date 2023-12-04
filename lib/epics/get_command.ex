@@ -158,7 +158,7 @@ defmodule Epics.GetCommand do
     ]
   end
 
-  def decode_channel_get_response(data) do
+  def decode_channel_get_response(structure, data) do
     case data do
       <<0xCA, _version, flags, 0x0A, <<_payload_size::32-little>>, payload::binary>> ->
         <<(<<request_id::32-little>>), @get_cmd, status, rest::binary>> = payload
@@ -173,8 +173,6 @@ defmodule Epics.GetCommand do
             _ -> :fatal
           end
 
-        IO.inspect("hello")
-
         # TODO: handle case when status is not 255 and we need to extract the string
         # TODO: don't decode the rest on error or fatal
 
@@ -183,10 +181,18 @@ defmodule Epics.GetCommand do
         # bitsets start with the size, then the "bits", e.g. 01 80 => length 1 + 00000001 => [7] as the 7th bit is 1
         # Another example: 02 17 (23 in dec) 01 => length 2 + 11101000 10000000 (LSB to MSB) => [0, 1, 2, 4, 8]
         <<bitset_length, bitset::binary-size(bitset_length), rest::binary>> = rest
-        IO.inspect(bitset)
-
         changes = Epics.Bitset.to_array(bitset)
         IO.inspect(changes)
+
+        value_paths = Epics.PvStructure.get_value_paths_in_order(structure)
+        value_structure = Epics.PvStructure.get_field_from_path(structure, hd(value_paths))
+        IO.inspect(value_structure)
+        {value, rest} =
+        case value_structure.type do
+          "string" ->
+            <<string_length, value::binary-size(string_length), rest::binary>> = rest
+            {value, rest}
+        end
 
         {:ok, %GetCommand{flags: flags, request_id: request_id, status: status}}
 
