@@ -90,7 +90,7 @@ defmodule PvStructureTest do
   test "flatten gets the value fields 'paths' in order" do
     structure = Epics.PvStructure.create("strvalue", "structure", 0, @example_fields)
 
-    result = Epics.PvStructure.flatten_value_fields(structure)
+    result = Epics.PvStructure.get_value_paths_in_order(structure)
 
     assert Enum.at(result, 0) == ["value"]
     assert Enum.at(result, 1) == ["display", "limitLow"]

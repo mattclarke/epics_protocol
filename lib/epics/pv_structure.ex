@@ -23,7 +23,7 @@ defmodule Epics.PvStructure do
     end)
   end
 
-  def flatten_value_fields(structure) do
+  def get_value_paths_in_order(structure) do
     flatten(structure, [], [])
   end
 
