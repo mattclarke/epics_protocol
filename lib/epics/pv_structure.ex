@@ -22,4 +22,18 @@ defmodule Epics.PvStructure do
       end
     end)
   end
+
+  def flatten_value_fields(structure) do
+    flatten(structure, [])
+  end
+
+  defp flatten(structure, acc) do
+    if structure.fields != nil do
+      Enum.reduce(structure.fields, acc, fn field, acc ->
+        flatten(field, acc)
+      end)
+    else
+      acc ++ [structure]
+    end
+  end
 end

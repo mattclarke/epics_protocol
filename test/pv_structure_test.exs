@@ -49,17 +49,17 @@ defmodule PvStructureTest do
   ]
 
   test "can create PvStructure" do
-    result = Epics.PvStructure.create("strvalue", "string", 123, @example_fields, "hello")
+    result = Epics.PvStructure.create("strvalue", "structure", 0, @example_fields, "hello")
 
     assert result.name == "strvalue"
-    assert result.type == "string"
-    assert result.introspection_id == 123
+    assert result.type == "structure"
+    assert result.introspection_id == 0
     assert result.fields == @example_fields
     assert result.value == "hello"
   end
 
   test "can access top-level field by name" do
-    structure = Epics.PvStructure.create("strvalue", "string", 123, @example_fields)
+    structure = Epics.PvStructure.create("strvalue", "structure", 0, @example_fields)
 
     result = Epics.PvStructure.get_field(structure, "display")
 
@@ -70,8 +70,32 @@ defmodule PvStructureTest do
   end
 
   test "if field doesn't exist then returns nil" do
-    structure = Epics.PvStructure.create("strvalue", "string", 123, @example_fields)
+    structure = Epics.PvStructure.create("strvalue", "structure", 0, @example_fields)
 
     assert Epics.PvStructure.get_field(structure, "does not exist") == nil
+  end
+
+  test "can access non top level field by name" do
+    structure = Epics.PvStructure.create("strvalue", "structure", 0, @example_fields)
+
+    display = Epics.PvStructure.get_field(structure, "display")
+    result = Epics.PvStructure.get_field(display, "limitLow")
+
+    assert result.name == "limitLow"
+    assert result.type == "double"
+    assert result.introspection_id == nil
+    assert result.fields == nil
+  end
+
+  test "flatten gets the value fields in order" do
+    structure = Epics.PvStructure.create("strvalue", "structure", 0, @example_fields)
+
+    result = Epics.PvStructure.flatten_value_fields(structure)
+
+    assert Enum.at(result, 0).name == "value"
+    assert Enum.at(result, 1).name == "limitLow"
+    assert Enum.at(result, 2).name == "limitHigh"
+    assert Enum.at(result, 3).name == "index"
+    assert Enum.at(result, 4).name == "choices"
   end
 end

@@ -169,7 +169,6 @@ defmodule GetCommandTest do
 
     assert result.request_id == 12345
     assert result.status == :ok
-    IO.inspect(result.fields)
 
     assert result.fields == @expected_string_structure
   end
@@ -225,6 +224,6 @@ defmodule GetCommandTest do
 
     assert result.request_id == 12345
     assert result.status == :ok
-    # assert Epics.PvStructure.get_field(result.fields, "value").value == "Hello world"
+    # assert Epics.PvStructure.get_field(result, "value").value == "Hello"
   end
 end
