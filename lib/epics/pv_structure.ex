@@ -24,16 +24,17 @@ defmodule Epics.PvStructure do
   end
 
   def flatten_value_fields(structure) do
-    flatten(structure, [])
+    flatten(structure, [], [])
   end
 
-  defp flatten(structure, acc) do
+  defp flatten(structure, path, acc) do
     if structure.fields != nil do
       Enum.reduce(structure.fields, acc, fn field, acc ->
-        flatten(field, acc)
+        flatten(field, path ++ [structure.name], acc)
       end)
     else
-      acc ++ [structure]
+      [_ | tail] = path ++ [structure.name]
+      acc ++ [tail]
     end
   end
 end
