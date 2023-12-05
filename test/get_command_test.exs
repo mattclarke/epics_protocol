@@ -228,7 +228,7 @@ defmodule GetCommandTest do
     assert Map.get(result.values, ["alarm", "severity"]) == 0
     assert Map.get(result.values, ["alarm", "status"]) == 2
     assert Map.get(result.values, ["alarm", "message"]) == "UDF"
-    assert Map.get(result.values, ["timeStamp", "secondsPastEpoch"]) == 631152000
+    assert Map.get(result.values, ["timeStamp", "secondsPastEpoch"]) == 631_152_000
     assert Map.get(result.values, ["timeStamp", "nanoseconds"]) == 0
     assert Map.get(result.values, ["timeStamp", "userTag"]) == 0
     assert Map.get(result.values, ["display", "limitLow"]) == 0
@@ -237,5 +237,8 @@ defmodule GetCommandTest do
     assert Map.get(result.values, ["display", "units"]) == ""
     assert Map.get(result.values, ["display", "precision"]) == 0
     assert Map.get(result.values, ["display", "form", "index"]) == 0
+
+    assert Map.get(result.values, ["display", "form", "choices"]) ==
+             {"Default", "String", "Binary", "Decimal", "Hex", "Exponential", "Engineering"}
   end
 end

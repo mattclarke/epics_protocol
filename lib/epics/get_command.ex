@@ -201,15 +201,26 @@ defmodule Epics.GetCommand do
 
                 :long ->
                   <<value::64-little, rest::binary>> = rest
-                  IO.inspect(value)
                   {value, rest}
 
                 :double ->
-                  <<value::32-little, rest::binary>> = rest
+                  <<value::64-little, rest::binary>> = rest
                   {value, rest}
 
                 :string_array ->
-                  {[], rest}
+                  <<num_strings, rest::binary>> = rest
+
+                  {strings, rest} =
+                    0..(num_strings - 1)
+                    |> Enum.reduce({[], rest}, fn _, {acc, rest} ->
+                      <<string_length, value::binary-size(string_length), rest::binary>> = rest
+
+                      {[value | acc], rest}
+                    end)
+
+                  strings = strings |> Enum.reverse() |> List.to_tuple()
+
+                  {strings, rest}
               end
 
             {Map.put(acc, vp, value), rest}
