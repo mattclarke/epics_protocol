@@ -7,7 +7,7 @@ defmodule Epics.PvStructure do
       name: name,
       type: type,
       introspection_id: introspection_id,
-      fields: fields,
+      fields: fields
     }
   end
 
@@ -23,12 +23,13 @@ defmodule Epics.PvStructure do
   end
 
   def get_field_from_path(structure, path) do
-   {field, _} = find_field_and_parent_from_path(structure, path)
-   field
+    {field, _} = find_field_and_parent_from_path(structure, path)
+    field
   end
 
   defp find_field_and_parent_from_path(structure, [name]) do
     field = get_field(structure, name)
+
     if field == nil do
       {nil, nil}
     else
@@ -38,6 +39,7 @@ defmodule Epics.PvStructure do
 
   defp find_field_and_parent_from_path(structure, [name | path]) do
     field = get_field(structure, name)
+
     if field == nil do
       {nil, nil}
     else

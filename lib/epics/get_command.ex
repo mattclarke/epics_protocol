@@ -1,7 +1,7 @@
 defmodule Epics.GetCommand do
   alias Epics.GetCommand
   alias Epics.PvStructure
-  defstruct [:flags, :request_id, :status, :fields]
+  defstruct [:flags, :request_id, :status, :fields, :values]
 
   @type epics_type :: :string | :int | :float | :long | :double | :string_array
 
@@ -187,14 +187,17 @@ defmodule Epics.GetCommand do
         value_paths = Epics.PvStructure.get_value_paths_in_order(structure)
         value_structure = Epics.PvStructure.get_field_from_path(structure, hd(value_paths))
         IO.inspect(value_structure)
-        {value, rest} =
-        case value_structure.type do
-          "string" ->
-            <<string_length, value::binary-size(string_length), rest::binary>> = rest
-            {value, rest}
-        end
 
-        {:ok, %GetCommand{flags: flags, request_id: request_id, status: status}}
+        {value, rest} =
+          case value_structure.type do
+            "string" ->
+              <<string_length, value::binary-size(string_length), rest::binary>> = rest
+              {value, rest}
+          end
+
+        values = %{hd(value_paths) => value}
+
+        {:ok, %GetCommand{flags: flags, request_id: request_id, status: status, values: values}}
 
       _ ->
         {:error, "Binary data does not conform to expected channelGetResponseInit format"}

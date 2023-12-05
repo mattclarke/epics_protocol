@@ -269,6 +269,7 @@ defmodule GetCommandTest do
       ],
       value: nil
     }
+
     binary_response =
       <<202, 2, 64, 10, 151, 0, 0, 0, 57, 48, 0, 0, 0, 255, 1, 1, 5, 72, 101, 108, 108, 111, 0, 0,
         0, 0, 2, 0, 0, 0, 3, 85, 68, 70, 128, 157, 158, 37, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -278,11 +279,11 @@ defmodule GetCommandTest do
         116, 105, 97, 108, 11, 69, 110, 103, 105, 110, 101, 101, 114, 105, 110, 103, 0, 0, 0, 0,
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0>>
 
-    {:ok, result} = Epics.GetCommand.decode_channel_get_response(corresponding_structure, binary_response)
-    IO.inspect(result)
+    {:ok, result} =
+      Epics.GetCommand.decode_channel_get_response(corresponding_structure, binary_response)
 
     assert result.request_id == 12345
     assert result.status == :ok
-    # assert Epics.PvStructure.get_field(result, "value").value == "Hello"
+    assert Map.get(result.values, ["value"]) == "Hello"
   end
 end
