@@ -237,8 +237,10 @@ defmodule GetCommandTest do
     assert Map.get(result.values, ["display", "units"]) == ""
     assert Map.get(result.values, ["display", "precision"]) == 0
     assert Map.get(result.values, ["display", "form", "index"]) == 0
-
     assert Map.get(result.values, ["display", "form", "choices"]) ==
              {"Default", "String", "Binary", "Decimal", "Hex", "Exponential", "Engineering"}
+    assert Map.get(result.values, ["control", "limitLow"]) == 0
+    assert Map.get(result.values, ["control", "limitHigh"]) == 0
+    assert Map.get(result.values, ["control", "minStep"]) == 0
   end
 end
