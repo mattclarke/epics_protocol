@@ -1,6 +1,6 @@
 defmodule Epics.PvStructure do
   alias Epics.PvStructure
-  defstruct [:name, :type, :introspection_id, :fields, :value]
+  defstruct [:name, :type, :introspection_id, :fields]
 
   def create(name, type, introspection_id \\ nil, fields \\ nil) do
     %PvStructure{

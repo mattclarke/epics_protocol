@@ -3,7 +3,7 @@ defmodule Epics.GetCommand do
   alias Epics.PvStructure
   defstruct [:flags, :request_id, :status, :fields, :values]
 
-  @type epics_type :: :string | :int | :float | :long | :double | :string_array
+  @type epics_type :: :string | :int | :float | :long | :double | :string_array | :boolean | :byte
 
   @init_cmd 0x08
   @get_cmd 0x00
@@ -108,6 +108,12 @@ defmodule Epics.GetCommand do
 
     {type, rest} =
       case typecode do
+        0x00 ->
+          {PvStructure.create(name, :boolean), rest}
+
+        0x20 ->
+          {PvStructure.create(name, :byte), rest}
+
         0x60 ->
           {PvStructure.create(name, :string), rest}
 
@@ -191,6 +197,19 @@ defmodule Epics.GetCommand do
 
             {value, rest} =
               case value_structure.type do
+                :boolean ->
+                  <<value, rest::binary>> = rest
+
+                  if value == 0 do
+                    {false, rest}
+                  else
+                    {true, rest}
+                  end
+
+                :byte ->
+                  <<value, rest::binary>> = rest
+                  {value, rest}
+
                 :string ->
                   <<string_length, value::binary-size(string_length), rest::binary>> = rest
                   {value, rest}
@@ -204,7 +223,7 @@ defmodule Epics.GetCommand do
                   {value, rest}
 
                 :double ->
-                  <<value::64-little, rest::binary>> = rest
+                  <<value::64-float-little, rest::binary>> = rest
                   {value, rest}
 
                 :string_array ->

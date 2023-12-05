@@ -52,6 +52,15 @@ defmodule EpicsProtocol do
     {:ok, reply} = :gen_tcp.recv(socket, 0, 5000)
 
     # Reply is channelGetResponseInit
+    {:ok, structure} = Epics.GetCommand.decode_channel_get_response_init(reply)
+
+    # Make a proper get request
+    get_cmd = Epics.GetCommand.create_get_command(response.server_channel_id, 12345)
+    :ok = :gen_tcp.send(socket, get_cmd)
+    {:ok, reply} = :gen_tcp.recv(socket, 0, 5000)
+    IO.inspect(reply, limit: :infinity)
+    {:ok, values} = Epics.GetCommand.decode_channel_get_response(structure.fields, reply)
+
   end
 
   def pvget(pvname, address, port) do
