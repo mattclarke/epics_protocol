@@ -210,66 +210,6 @@ defmodule GetCommandTest do
   end
 
   test "decode channelGetResponse for stringin" do
-    corresponding_structure = %Epics.PvStructure{
-      name: "strvalue",
-      type: "structure",
-      introspection_id: 0,
-      fields: [
-        %Epics.PvStructure{
-          name: "value",
-          type: "string",
-          introspection_id: nil,
-          fields: nil,
-          value: nil
-        },
-        %Epics.PvStructure{
-          name: "display",
-          type: "structure",
-          introspection_id: 4,
-          fields: [
-            %Epics.PvStructure{
-              name: "limitLow",
-              type: "double",
-              introspection_id: nil,
-              fields: nil,
-              value: nil
-            },
-            %Epics.PvStructure{
-              name: "limitHigh",
-              type: "double",
-              introspection_id: nil,
-              fields: nil,
-              value: nil
-            },
-            %Epics.PvStructure{
-              name: "form",
-              type: "enum_t",
-              introspection_id: 5,
-              fields: [
-                %Epics.PvStructure{
-                  name: "index",
-                  type: "int",
-                  introspection_id: nil,
-                  fields: nil,
-                  value: nil
-                },
-                %Epics.PvStructure{
-                  name: "choices",
-                  type: "string[]",
-                  introspection_id: nil,
-                  fields: nil,
-                  value: nil
-                }
-              ],
-              value: nil
-            }
-          ],
-          value: nil
-        }
-      ],
-      value: nil
-    }
-
     binary_response =
       <<202, 2, 64, 10, 151, 0, 0, 0, 57, 48, 0, 0, 0, 255, 1, 1, 5, 72, 101, 108, 108, 111, 0, 0,
         0, 0, 2, 0, 0, 0, 3, 85, 68, 70, 128, 157, 158, 37, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -280,10 +220,12 @@ defmodule GetCommandTest do
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0>>
 
     {:ok, result} =
-      Epics.GetCommand.decode_channel_get_response(corresponding_structure, binary_response)
+      Epics.GetCommand.decode_channel_get_response(@expected_string_structure, binary_response)
 
     assert result.request_id == 12345
     assert result.status == :ok
     assert Map.get(result.values, ["value"]) == "Hello"
+    assert Map.get(result.values, ["alarm", "severity"]) == 0
+    assert Map.get(result.values, ["alarm", "status"]) == 2
   end
 end

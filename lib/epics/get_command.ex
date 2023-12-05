@@ -182,20 +182,35 @@ defmodule Epics.GetCommand do
         # Another example: 02 17 (23 in dec) 01 => length 2 + 11101000 10000000 (LSB to MSB) => [0, 1, 2, 4, 8]
         <<bitset_length, bitset::binary-size(bitset_length), rest::binary>> = rest
         changes = Epics.Bitset.to_array(bitset)
-        IO.inspect(changes)
 
         value_paths = Epics.PvStructure.get_value_paths_in_order(structure)
-        value_structure = Epics.PvStructure.get_field_from_path(structure, hd(value_paths))
-        IO.inspect(value_structure)
 
-        {value, rest} =
-          case value_structure.type do
-            "string" ->
-              <<string_length, value::binary-size(string_length), rest::binary>> = rest
-              {value, rest}
-          end
+        {values, _rest} =
+          Enum.reduce(value_paths, {%{}, rest}, fn vp, {acc, rest} ->
+            value_structure = Epics.PvStructure.get_field_from_path(structure, vp)
 
-        values = %{hd(value_paths) => value}
+            {value, rest} =
+              case value_structure.type do
+                :string ->
+                  <<string_length, value::binary-size(string_length), rest::binary>> = rest
+                  {value, rest}
+
+                :int ->
+                  <<value::32-little, rest::binary>> = rest
+                  {value, rest}
+
+                :long ->
+                  {123, rest}
+
+                :double ->
+                  {3.14, rest}
+
+                :string_array ->
+                  {[], rest}
+              end
+
+            {Map.put(acc, vp, value), rest}
+          end)
 
         {:ok, %GetCommand{flags: flags, request_id: request_id, status: status, values: values}}
 
