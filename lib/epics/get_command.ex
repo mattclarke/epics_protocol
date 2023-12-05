@@ -200,10 +200,13 @@ defmodule Epics.GetCommand do
                   {value, rest}
 
                 :long ->
-                  {123, rest}
+                  <<value::64-little, rest::binary>> = rest
+                  IO.inspect(value)
+                  {value, rest}
 
                 :double ->
-                  {3.14, rest}
+                  <<value::32-little, rest::binary>> = rest
+                  {value, rest}
 
                 :string_array ->
                   {[], rest}

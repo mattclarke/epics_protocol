@@ -227,5 +227,15 @@ defmodule GetCommandTest do
     assert Map.get(result.values, ["value"]) == "Hello"
     assert Map.get(result.values, ["alarm", "severity"]) == 0
     assert Map.get(result.values, ["alarm", "status"]) == 2
+    assert Map.get(result.values, ["alarm", "message"]) == "UDF"
+    assert Map.get(result.values, ["timeStamp", "secondsPastEpoch"]) == 631152000
+    assert Map.get(result.values, ["timeStamp", "nanoseconds"]) == 0
+    assert Map.get(result.values, ["timeStamp", "userTag"]) == 0
+    assert Map.get(result.values, ["display", "limitLow"]) == 0
+    assert Map.get(result.values, ["display", "limitHigh"]) == 0
+    assert Map.get(result.values, ["display", "description"]) == ""
+    assert Map.get(result.values, ["display", "units"]) == ""
+    assert Map.get(result.values, ["display", "precision"]) == 0
+    assert Map.get(result.values, ["display", "form", "index"]) == 0
   end
 end
