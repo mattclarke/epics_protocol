@@ -62,7 +62,7 @@ defmodule Epics.GetCommand do
         # TODO: don't decode the rest on error or fatal
 
         # starts with fd then introspection ID (unique short)
-        <<0xFD, introspection_id::16-little, field_description, _rest::binary>> = rest
+        <<0xFD, _introspection_id::16-little, field_description, _rest::binary>> = rest
 
         {fields, _} =
           case field_description do
@@ -187,7 +187,7 @@ defmodule Epics.GetCommand do
         # bitsets start with the size, then the "bits", e.g. 01 80 => length 1 + 00000001 => [7] as the 7th bit is 1
         # Another example: 02 17 (23 in dec) 01 => length 2 + 11101000 10000000 (LSB to MSB) => [0, 1, 2, 4, 8]
         <<bitset_length, bitset::binary-size(bitset_length), rest::binary>> = rest
-        changes = Epics.Bitset.to_array(bitset)
+        _changes = Epics.Bitset.to_array(bitset)
 
         value_paths = Epics.PvStructure.get_value_paths_in_order(structure)
 

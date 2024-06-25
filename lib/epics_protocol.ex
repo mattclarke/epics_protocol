@@ -1,5 +1,5 @@
 defmodule EpicsProtocol do
-  def search_for_pv(name \\ "SIMPLE:VALUE2") do
+  def search_for_pv(name) do
     options = [
       {:mode, :binary},
       {:active, false},
@@ -13,7 +13,7 @@ defmodule EpicsProtocol do
     data = Epics.Protocol.create_search_message(port, name)
 
     # Need to auto configure ip address somehow
-    :ok = :gen_udp.send(socket, {192, 168, 0, 255}, 5076, data)
+    :ok = :gen_udp.send(socket, {172, 18, 23, 255}, 5076, data)
 
     :gen_udp.recv(socket, 0, _timeout = 5000)
   end
@@ -53,7 +53,7 @@ defmodule EpicsProtocol do
     get_cmd = Epics.GetCommand.create_init_get_command(server_channel_id, request_id)
     :ok = :gen_tcp.send(socket, get_cmd)
     {:ok, reply} = :gen_tcp.recv(socket, 0, 5000)
-    {:ok, structure} = Epics.GetCommand.decode_channel_get_response_init(reply)
+    {:ok, _structure} = Epics.GetCommand.decode_channel_get_response_init(reply)
   end
 
   def get_command(socket, server_channel_id, request_id, fields) do
@@ -61,7 +61,7 @@ defmodule EpicsProtocol do
     get_cmd = Epics.GetCommand.create_get_command(server_channel_id, request_id)
     :ok = :gen_tcp.send(socket, get_cmd)
     {:ok, reply} = :gen_tcp.recv(socket, 0, 5000)
-    {:ok, response} = Epics.GetCommand.decode_channel_get_response(fields, reply)
+    {:ok, _response} = Epics.GetCommand.decode_channel_get_response(fields, reply)
   end
 
   def print_pv_data(fields, values) do

@@ -4,7 +4,7 @@
 ```
 $ iex -S mix
 
-> {:ok, reply} = EpicsProtocol.search_for_pv()
+> {:ok, reply} = EpicsProtocol.search_for_pv("SIMPLE:VALUE2")
 > {:ok, response} = Epics.SearchReponse.decode(reply)
 # IP and port are hard-coded - need to work out how to set them based on the response
 > EpicsProtocol.pvget("SIMPLE:VALUE2", "192.168.0.174", 5075)
