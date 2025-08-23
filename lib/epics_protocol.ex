@@ -41,7 +41,6 @@ defmodule EpicsProtocol do
   end
 
   def create_channel(socket, pvname, request_id) do
-    # TODO: these numbers (1234) need to be unique
     request = Epics.Channel.create_channel_request(pvname, request_id)
     :ok = :gen_tcp.send(socket, request)
     {:ok, reply} = :gen_tcp.recv(socket, 0, 5000)
@@ -77,6 +76,7 @@ defmodule EpicsProtocol do
 
   def pvget(pvname, address, port) do
     {:ok, socket} = establish_connection(address, port)
+    # TODO: this number (12345) needs to be unique
     {:ok, response} = create_channel(socket, pvname, 12345)
     {:ok, structure} = get_command_init(socket, response.server_channel_id, 12345)
     {:ok, response} = get_command(socket, response.server_channel_id,12345, structure.fields)
