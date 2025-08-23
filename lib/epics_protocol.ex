@@ -16,7 +16,7 @@ defmodule EpicsProtocol do
     # Could be 255.255.255.255?
     # or something else? xxx.255.255.255?
     # 0.0.0.0 is all local interfaces
-    :ok = :gen_udp.send(socket, {0, 0, 0, 0}, 5076, data)
+    :ok = :gen_udp.send(socket, {192, 168, 0, 233}, 5076, data)
 
     :gen_udp.recv(socket, 0, _timeout = 5000)
   end
@@ -68,13 +68,14 @@ defmodule EpicsProtocol do
 
   def print_pv_data(fields, values) do
     value_paths = Epics.PvStructure.get_value_paths_in_order(fields)
-      value_paths
-        |> Enum.reduce(nil, fn path, acc ->
-          value = Map.get(values, path)
-          spath = Enum.join(path, ":")
-          IO.puts("#{spath} #{inspect value}")
-          acc
-      end)
+
+    value_paths
+    |> Enum.reduce(nil, fn path, acc ->
+      value = Map.get(values, path)
+      spath = Enum.join(path, ":")
+      IO.puts("#{spath} #{inspect(value)}")
+      acc
+    end)
   end
 
   def pvget(pvname, address, port) do
@@ -82,7 +83,7 @@ defmodule EpicsProtocol do
     # TODO: this number (12345) needs to be unique
     {:ok, response} = create_channel(socket, pvname, 12345)
     {:ok, structure} = get_command_init(socket, response.server_channel_id, 12345)
-    {:ok, response} = get_command(socket, response.server_channel_id,12345, structure.fields)
+    {:ok, response} = get_command(socket, response.server_channel_id, 12345, structure.fields)
     print_pv_data(structure.fields, response.values)
   end
 end
