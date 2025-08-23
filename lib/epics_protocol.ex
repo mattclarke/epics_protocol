@@ -13,7 +13,10 @@ defmodule EpicsProtocol do
     data = Epics.Protocol.create_search_message(port, name)
 
     # Need to auto configure ip address somehow
-    :ok = :gen_udp.send(socket, {172, 18, 23, 255}, 5076, data)
+    # Could be 255.255.255.255?
+    # or something else? xxx.255.255.255?
+    # 0.0.0.0 is all local interfaces
+    :ok = :gen_udp.send(socket, {0, 0, 0, 0}, 5076, data)
 
     :gen_udp.recv(socket, 0, _timeout = 5000)
   end
