@@ -215,16 +215,21 @@ defmodule Epics.GetCommand do
                   {value, rest}
 
                 :int ->
+                  # TODO: check for NaN
                   <<value::32-little, rest::binary>> = rest
                   {value, rest}
 
                 :long ->
+                  # TODO: check for NaN
                   <<value::64-little, rest::binary>> = rest
                   {value, rest}
 
                 :double ->
-                  <<value::64-float-little, rest::binary>> = rest
-                  {value, rest}
+                  # check for NaN
+                  case rest do
+                    <<0, 0, 0, 0, 0, 0, 248, 127, rest::binary>> -> {:nan, rest}
+                    <<value::64-float-little, rest::binary>> -> {value, rest}
+                  end
 
                 :string_array ->
                   <<num_strings, rest::binary>> = rest
