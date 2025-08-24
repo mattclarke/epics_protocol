@@ -4,10 +4,17 @@
 ```
 $ iex -S mix
 
-> {:ok, reply} = EpicsProtocol.search_for_pv("SIMPLE:VALUE2")
+> pvname = "SIMPLE:VALUE2"
+> request_id = 12345
+> {:ok, reply} = EpicsProtocol.search_for_pv(pvname)
 > {:ok, response} = Epics.SearchReponse.decode(reply)
-# IP and port are hard-coded - need to work out how to set them based on the response
-> EpicsProtocol.pvget("SIMPLE:VALUE2", "192.168.0.174", 5075)
+> {:ok, socket} = EpicsProtocol.establish_connection(response.server_address, response.server_port)
+> {:ok, channel} = EpicsProtocol.create_channel(socket, pvname, request_id)
+> {:ok, structure} = EpicsProtocol.get_command_init(socket, channel.server_channel_id, request_id)
+> {:ok, command} = EpicsProtocol.get_command(socket, channel.server_channel_id, request_id, structure.fields)
+
+# Or just do this:
+> EpicsProtocol.pvget("SIMPLE:VALUE2")
 ```
 
 ## Useful reminders
