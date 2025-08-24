@@ -39,6 +39,15 @@ defmodule Epics.SearchReponse do
 
         {search_instance_ids, _rest} = chunk_binary(rest, 32, num_search_instance_ids, [])
 
+        # Note about the server address
+        # The server address is ipv6 but could be an ipv4 address encoded as ipv6.
+        # In which case, it will look something like ::ffff:192.0.2.128
+        # (:: means consecutive zeros).
+        # For example:
+        #   <<a::16, b::16, c::16, d::16, e::16, f::16, g::16, h::16>> = <<server_address::128-little>>
+        # If f is ffff (65535) then it indicates that it is ipv4.
+        # We don't need to do anything though as the underlying library will deal with this.
+
         {:ok,
          %SearchReponse{
            found: found,

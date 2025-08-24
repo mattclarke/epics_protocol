@@ -78,8 +78,10 @@ defmodule EpicsProtocol do
     end)
   end
 
-  def pvget(pvname, address, port) do
-    {:ok, socket} = establish_connection(address, port)
+  def pvget(pvname) do
+    {:ok, reply} = search_for_pv(pvname)
+    {:ok, response} = Epics.SearchReponse.decode(reply)
+    {:ok, socket} = establish_connection(response.server_address, response.server_port)
     # TODO: this number (12345) needs to be unique
     {:ok, response} = create_channel(socket, pvname, 12345)
     {:ok, structure} = get_command_init(socket, response.server_channel_id, 12345)
