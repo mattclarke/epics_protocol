@@ -3,7 +3,8 @@ defmodule Epics.Protocol do
           binary()
         ]
   def create_search_message(reply_port, pv_name) do
-    payload_size = 38 + String.length(pv_name)
+    pv_name_length = String.length(pv_name)
+    payload_size = 38 + pv_name_length
 
     [
       # HEADER
@@ -55,7 +56,7 @@ defmodule Epics.Protocol do
       # Search instance ID
       <<12345::32-little>>,
       # Size of channel name
-      13,
+      pv_name_length,
       # Channel name
       pv_name
     ]
